@@ -1,0 +1,68 @@
+Eo_Baddies_Orbs.png
+size: 1408, 32
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Anti-Matter-Orb
+  rotate: false
+  xy: 0, 0
+  size: 256, 32
+  orig: 256, 32
+  offset: 0, 0
+  index: -1
+Anti_Eo_Down_Sprite_Pack
+  rotate: false
+  xy: 256, 0
+  size: 128, 32
+  orig: 128, 32
+  offset: 0, 0
+  index: -1
+Anti_Eo_Sprite_Pack
+  rotate: false
+  xy: 384, 0
+  size: 128, 32
+  orig: 128, 32
+  offset: 0, 0
+  index: -1
+Anti_Eo_Up_Sprite_Pack
+  rotate: false
+  xy: 512, 0
+  size: 128, 32
+  orig: 128, 32
+  offset: 0, 0
+  index: -1
+Blobbo_Falling
+  rotate: false
+  xy: 640, 0
+  size: 128, 32
+  orig: 128, 32
+  offset: 0, 0
+  index: -1
+Eo_Down_Sprite_Pack
+  rotate: false
+  xy: 768, 0
+  size: 128, 32
+  orig: 128, 32
+  offset: 0, 0
+  index: -1
+Eo_Sprite_Pack
+  rotate: false
+  xy: 896, 0
+  size: 128, 32
+  orig: 128, 32
+  offset: 0, 0
+  index: -1
+Eo_Up_Sprite_Pack
+  rotate: false
+  xy: 1024, 0
+  size: 128, 32
+  orig: 128, 32
+  offset: 0, 0
+  index: -1
+Matter-Orb
+  rotate: false
+  xy: 1152, 0
+  size: 256, 32
+  orig: 256, 32
+  offset: 0, 0
+  index: -1
