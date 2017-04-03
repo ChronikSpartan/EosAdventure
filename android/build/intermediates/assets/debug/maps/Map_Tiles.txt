@@ -1,0 +1,12 @@
+Map_Tiles.png
+size: 320, 320
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+TilePack
+  rotate: false
+  xy: 0, 0
+  size: 320, 320
+  orig: 320, 320
+  offset: 0, 0
+  index: -1
