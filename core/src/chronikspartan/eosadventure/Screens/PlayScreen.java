@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -53,8 +56,35 @@ public class PlayScreen implements Screen {
 
     private Eo player;
 
+    private Array<TextureRegion> tiles;
+    private int tileWidth = 32;
+    private int tileHeight = 32;
+    private int packHeight = 10;
+    private int packWidth = 10;
+    private TextureRegion region1, region2, region3, region4;
+
     public PlayScreen(EosAdventure game){
         atlas = new TextureAtlas("sprites/Eo_Baddies_Orbs.pack");
+        TextureRegion region = new TextureRegion(new Texture("maps/TilePack.png"));
+
+        tiles = new Array<TextureRegion>();
+        for (int h = 0; h < packHeight; h++)
+            for(int w = 0; w < packWidth; w++)
+                tiles.add(new TextureRegion(region, w * tileWidth, h * tileHeight, tileWidth, tileHeight));
+
+        region1 = tiles.get(61);
+        region2 = tiles.get(62);
+        region3 = tiles.get(61);
+        region4 = tiles.get(62);
+
+        region1.setRegionX(0);
+        region1.setRegionY(0);
+        region2.setRegionX(32);
+        region2.setRegionY(0);
+        region3.setRegionX(64);
+        region3.setRegionY(0);
+        region4.setRegionX(96);
+        region4.setRegionY(0);
 
         this.game = game;
         gameCam = new OrthographicCamera();
@@ -103,6 +133,26 @@ public class PlayScreen implements Screen {
         gameCam.position.x = player.b2Body.getPosition().x;
         gameCam.position.y = player.b2Body.getPosition().y;
 
+        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region1.getRegionX()) {
+            region1 = tiles.get(33);
+            region1.setRegionX(region4.getRegionX() + 32);
+        }
+
+        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region2.getRegionX()) {
+            region2 = tiles.get(36);
+            region2.setRegionX(region1.getRegionX() + 32);
+        }
+
+        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region3.getRegionX()) {
+            region3 = tiles.get(33);
+            region3.setRegionX(region2.getRegionX() + 32);
+        }
+
+        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region4.getRegionX()) {
+            region4 = tiles.get(36);
+            region4.setRegionX(region3.getRegionX() + 32);
+        }
+
         gameCam.update();
         renderer.setView(gameCam);
     }
@@ -114,12 +164,16 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        renderer.render();
+       // renderer.render();
 
         b2dr.render(world, gameCam.combined);
 
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
+        game.batch.draw(region1, region1.getRegionX(), region1.getRegionY());
+        game.batch.draw(region2, region2.getRegionX(), region2.getRegionY());
+        game.batch.draw(region3, region3.getRegionX(), region3.getRegionY());
+        game.batch.draw(region4, region4.getRegionX(), region4.getRegionY());
         player.draw(game.batch);
         game.batch.end();
 
