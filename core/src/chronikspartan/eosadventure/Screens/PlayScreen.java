@@ -8,23 +8,16 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.PolygonMapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import java.util.concurrent.ThreadLocalRandom;
 
 import chronikspartan.eosadventure.EosAdventure;
 import chronikspartan.eosadventure.Scenes.Hud;
@@ -56,35 +49,44 @@ public class PlayScreen implements Screen {
 
     private Eo player;
 
-    private Array<TextureRegion> tiles;
+    private Array<TextureRegion> tileSet;
+	private Array<Vector2> tilePos;
+	private int[][] tiles;
     private int tileWidth = 32;
     private int tileHeight = 32;
     private int packHeight = 10;
     private int packWidth = 10;
+	private int screenTileWidth = 20;
+	private int screenTileHeight = 15;
     private TextureRegion region1, region2, region3, region4;
+	private Vector2 region1Pos, region2Pos, region3Pos, region4Pos;
 
     public PlayScreen(EosAdventure game){
         atlas = new TextureAtlas("sprites/Eo_Baddies_Orbs.pack");
         TextureRegion region = new TextureRegion(new Texture("maps/TilePack.png"));
 
-        tiles = new Array<TextureRegion>();
+        tileSet = new Array<TextureRegion>();
         for (int h = 0; h < packHeight; h++)
             for(int w = 0; w < packWidth; w++)
-                tiles.add(new TextureRegion(region, w * tileWidth, h * tileHeight, tileWidth, tileHeight));
-
-        region1 = tiles.get(61);
-        region2 = tiles.get(62);
-        region3 = tiles.get(61);
-        region4 = tiles.get(62);
-
-        region1.setRegionX(0);
-        region1.setRegionY(0);
-        region2.setRegionX(32);
-        region2.setRegionY(0);
-        region3.setRegionX(64);
-        region3.setRegionY(0);
-        region4.setRegionX(96);
-        region4.setRegionY(0);
+                tileSet.add(new TextureRegion(region, w * tileWidth, h * tileHeight, tileWidth, tileHeight));
+		
+		tiles = new int[screenTileWidth][screenTileHeight];
+		tilePos = new Array<Vector2>();
+		tiles[0][0] = 60;
+		tilePos.add(new Vector2(0,0));
+		for (int i = 1; i < screenTileWidth; i++)
+		{
+			// nextInt is normally exclusive of the top value,
+			// so add 1 to make it inclusive
+			int randomNum = ThreadLocalRandom.current().nextInt(1, 3);
+		
+			if(randomNum == 1)
+				tiles[i][0] = 61;
+			else
+				tiles[i][0] = 62;
+				
+			tilePos.add(new Vector2(i * 32, 0));
+		}
 
         this.game = game;
         gameCam = new OrthographicCamera();
@@ -120,6 +122,9 @@ public class PlayScreen implements Screen {
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
             player.b2Body.applyLinearImpulse(new Vector2(0, 2f), player.b2Body.getWorldCenter(), true);
         }
+		if(Gdx.input.isTouched()){
+            player.b2Body.applyLinearImpulse(new Vector2(0, 2f), player.b2Body.getWorldCenter(), true);
+        }
     }
 
     public void update(float dt){
@@ -132,26 +137,101 @@ public class PlayScreen implements Screen {
 
         gameCam.position.x = player.b2Body.getPosition().x;
         gameCam.position.y = player.b2Body.getPosition().y;
+		
+		for (int y = 0; y < screenTileHeight; y++)
+		{
+			for (int x = 0; x < screenTileWidth; x++)
+			{
+				if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2 - tileWidth) > tilePos.get(x).x ) {
+					int endTile;
+					if (x == 0)
+						endTile = screenTileWidth - 1;
+					else
+						endTile = x - 1;
 
-        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region1.getRegionX()) {
-            region1 = tiles.get(33);
-            region1.setRegionX(region4.getRegionX() + 32);
-        }
+					if((x > 0) && (y > 0) && (tiles[x - 1][y - 1] == 63))
+						tiles[x][y] = 54;
+					else
+					if((tiles[endTile][y] == 60) || (tiles[endTile][y] == 61) || (tiles[endTile][y] == 62))
+					{
+						int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
 
-        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region2.getRegionX()) {
-            region2 = tiles.get(36);
-            region2.setRegionX(region1.getRegionX() + 32);
-        }
+						switch(nextTile){
+							case 1:
+								tiles[x][y] = 61;
+								break;
+							case 2:
+								tiles[x][y] = 62;
+								break;
+							case 3:
+								tiles[x][y] = 63;
+								break;
+							default:
+								tiles[x][y] = 61;
+						}
+					}
+					else
+					if((tiles[endTile][y] == 66) || (tiles[endTile][y] == 67) || (tiles[endTile][y] == 68))
+					{
+						int nextTile = ThreadLocalRandom.current().nextInt(1, 5);
 
-        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region3.getRegionX()) {
-            region3 = tiles.get(33);
-            region3.setRegionX(region2.getRegionX() + 32);
-        }
+						switch(nextTile){
+							case 1:
+								tiles[x][y] = 67;
+								break;
+							case 2:
+								tiles[x][y] = 68;
+								break;
+							case 3:
+								tiles[x][y] = 69;
+								break;
+							case 4:
+								tiles[x][y] = 63;
+								break;
+							default:
+								tiles[x][y] = 63;
+						}
+					}
+					else
+					if((tiles[endTile][y] == 63) || (tiles[endTile][y] == 64) || (tiles[endTile][y] == 65))
+					{
+						int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
 
-        if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2) < region4.getRegionX()) {
-            region4 = tiles.get(36);
-            region4.setRegionX(region3.getRegionX() + 32);
-        }
+						switch(nextTile){
+							case 1:
+								tiles[x][y] = 64;
+								break;
+							case 2:
+								tiles[x][y] = 65;
+								break;
+							case 3:
+								tiles[x][y] = 66;
+								break;
+							default:
+								tiles[x][y] = 64;
+						}
+					}
+					else
+					if((tiles[endTile][y] == 69) || (tiles[endTile][y] == 0))
+					{
+						int nextTile = ThreadLocalRandom.current().nextInt(1, 3);
+
+						switch(nextTile){
+							case 1:
+								tiles[x][y] = 0;
+								break;
+							case 2:
+								tiles[x][y] = 60;
+								break;
+							default:
+								tiles[x][y] = 0;
+						}
+					}
+
+					tilePos.get(x).x = tilePos.get(endTile).x + 32;
+				}
+			}
+		}
 
         gameCam.update();
         renderer.setView(gameCam);
@@ -170,10 +250,9 @@ public class PlayScreen implements Screen {
 
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
-        game.batch.draw(region1, region1.getRegionX(), region1.getRegionY());
-        game.batch.draw(region2, region2.getRegionX(), region2.getRegionY());
-        game.batch.draw(region3, region3.getRegionX(), region3.getRegionY());
-        game.batch.draw(region4, region4.getRegionX(), region4.getRegionY());
+		for(int y = 0; y < screenTileHeight  ; y++)
+			for(int x = 0; x < screenTileWidth; x++)
+        	game.batch.draw(tileSet.get(tiles[x][y]), tilePos.get(x).x, tilePos.get(x).y);
         player.draw(game.batch);
         game.batch.end();
 
