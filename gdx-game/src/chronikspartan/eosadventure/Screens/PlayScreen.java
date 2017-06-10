@@ -8,19 +8,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.PolygonMapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -58,13 +50,15 @@ public class PlayScreen implements Screen {
     private Eo player;
 
     private Array<TextureRegion> tileSet;
-	private Array<Vector2> tilePos;
-	private int[] tiles;
+	//private Array<Vector2> tilePos;
+	private int[][] tiles;
+	private Vector2[][] tilePos;
     private int tileWidth = 32;
     private int tileHeight = 32;
     private int packHeight = 10;
     private int packWidth = 10;
-	private int tilesOnScreen = 20;
+	private int screenTileWidth = 20;
+	private int screenTileHeight = 15;
     private TextureRegion region1, region2, region3, region4;
 	private Vector2 region1Pos, region2Pos, region3Pos, region4Pos;
 
@@ -77,22 +71,34 @@ public class PlayScreen implements Screen {
             for(int w = 0; w < packWidth; w++)
                 tileSet.add(new TextureRegion(region, w * tileWidth, h * tileHeight, tileWidth, tileHeight));
 		
-		tiles = new int[tilesOnScreen];
-		tilePos = new Array<Vector2>();
-		tiles[0] = 60;
-		tilePos.add(new Vector2(0,0));
-		for (int i = 1; i < tilesOnScreen; i++)
-		{
-			// nextInt is normally exclusive of the top value,
-			// so add 1 to make it inclusive
-			int randomNum = ThreadLocalRandom.current().nextInt(1, 3);
+		tiles = new int[screenTileWidth][screenTileHeight];
+		tilePos = new Vector2[screenTileWidth][screenTileHeight];
 		
-			if(randomNum == 1)
-				tiles[i] = 61;
-			else
-				tiles[i] = 62;
+		for (int y = 0; y < screenTileHeight; y++)
+		{
+			for (int x = 0; x < screenTileWidth; x++)
+			{
+				if(y == 0)
+				{
+					if(x == 0)
+						tiles[0][0] = 60;
+					else
+					{
+						// nextInt is normally exclusive of the top value,
+						// so add 1 to make it inclusive
+						int randomNum = ThreadLocalRandom.current().nextInt(1, 3);
+		
+						if(randomNum == 1)
+							tiles[x][0] = 61;
+						else
+							tiles[x][0] = 62;
+					}
+				}
+				else
+					tiles[x][y] = 0;
 				
-			tilePos.add(new Vector2(i * 32, 0));
+				tilePos[x][y] = new Vector2(x * 32, y * 32);
+			}
 		}
 
         this.game = game;
@@ -145,93 +151,241 @@ public class PlayScreen implements Screen {
         gameCam.position.x = player.b2Body.getPosition().x;
         gameCam.position.y = player.b2Body.getPosition().y;
 		
-		for (int i = 0; i < tilesOnScreen; i++)
+		for (int y = 0; y < screenTileHeight; y++)
 		{
-        	if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2 - tileWidth) > tilePos.get(i).x ) {
-				int endTile;
-				if (i == 0)
-					endTile = tilesOnScreen - 1;
-				else
-					endTile = i - 1;
-				
-				if((tiles[endTile] == 60) || (tiles[endTile] == 61) || (tiles[endTile] == 62))
-				{
-					int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
-					
-					switch(nextTile){
-						case 1: 
-							tiles[i] = 61;
-							break;
-						case 2:
-							tiles[i] = 62;
-							break;
-						case 3: 
-							tiles[i] = 63;
-							break;
-						default:
-							tiles[i] = 61;
-					}
-				}
-				else
-				if((tiles[endTile] == 66) || (tiles[endTile] == 67) || (tiles[endTile] == 68))
-				{
-					int nextTile = ThreadLocalRandom.current().nextInt(1, 5);
+			for (int x = 0; x < screenTileWidth; x++)
+			{
+				if((gameCam.position.x - EosAdventure.VIEW_WIDTH/2 - tileWidth) > tilePos[x][y].x ) {
+					int endTileX;
+					if (x == 0)
+						endTileX = screenTileWidth - 1;
+					else
+						endTileX = x - 1;
+						
+					if(y > 0)
+					{
+						if((tiles[x][y - 1] == 63) || (tiles[x][y - 1] == 54))
+						{
+							int nextTile = ThreadLocalRandom.current().nextInt(1, 3);
 
-					switch(nextTile){
-						case 1: 
-							tiles[i] = 67;
-							break;
-						case 2:
-							tiles[i] = 68;
-							break;
-						case 3: 
-							tiles[i] = 69;
-							break;
-						case 4:
-							tiles[i] = 63;
-							break;
-						default:
-							tiles[i] = 63;
-					}
-				}
-				else
-				if((tiles[endTile] == 63) || (tiles[endTile] == 64) || (tiles[endTile] == 65))
-				{
-					int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
+							switch(nextTile){
+								case 1:
+									tiles[x][y] = 53;
+									break;
+								case 2:
+									tiles[x][y] = 44;
+									break;
+								default:
+									tiles[x][y] = 44;
+								}
+						}
+						
+						if((tiles[x][y - 1] == 64) || (tiles[x][y - 1] == 65))
+						{
+							if((tiles[endTileX][y] == 64) || (tiles[endTileX][y] == 65) || (tiles[endTileX][y] == 54))
+							{
+								int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
 
-					switch(nextTile){
-						case 1: 
-							tiles[i] = 64;
-							break;
-						case 2:
-							tiles[i] = 65;
-							break;
-						case 3: 
-							tiles[i] = 66;
-							break;
-						default:
-							tiles[i] = 64;
-					}
-				}
-				else
-				if((tiles[endTile]== 69) || (tiles[endTile] == 0))
-				{
-					int nextTile = ThreadLocalRandom.current().nextInt(1, 3);
+								switch(nextTile){
+									case 1:
+										tiles[x][y] = 55;
+										break;
+									case 2:
+										tiles[x][y] = 64;
+										break;
+									case 3:
+										tiles[x][y] = 65;
+										break;
+									default:
+										tiles[x][y] = 65;
+								}
+							}
+							else if((tiles[x][y - 1] == 55) ||(tiles[x][y - 1] == 66))
+							{
+								int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
 
-					switch(nextTile){
-						case 1: 
-							tiles[i] = 0;
-							break;
-						case 2:
-							tiles[i] = 60;
-							break;
-						default:
-							tiles[i] = 0;
+								switch(nextTile){
+									case 1:
+										tiles[x][y] = 67;
+										break;
+									case 2:
+										tiles[x][y] = 68;
+										break;
+									case 3:
+										tiles[x][y] = 54;
+										break;
+									default:
+										tiles[x][y] = 54;
+								}
+							}
+							else
+							{
+								int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
+
+								switch(nextTile){
+									case 1:
+										tiles[x][y] = 54;
+										break;
+									case 2:
+										tiles[x][y] = 61;
+										break;
+									case 3:
+										tiles[x][y] = 62;
+										break;
+									default:
+										tiles[x][y] = 62;
+								}
+							}
+						}
+						/*
+						if((tiles[x][y - 1] == 65))
+						{
+							if((tiles[endTileX][y] == 64) || (tiles[endTileX][y] == 65) || (tiles[endTileX][y] == 54))
+							{
+								int nextTile = ThreadLocalRandom.current().nextInt(1, 5);
+
+								switch(nextTile){
+									case 1:
+										tiles[x][y] = 55;
+										break;
+									case 2:
+										tiles[x][y] = 67;
+										break;
+									case 3:
+										tiles[x][y] = 68;
+										break;
+									case 4:
+										tiles[x][y] = 65;
+										break;
+									default:
+										tiles[x][y] = 68;
+								}
+							}
+							else
+							{
+								int nextTile = ThreadLocalRandom.current().nextInt(1, 4);
+
+								switch(nextTile){
+									case 1:
+										tiles[x][y] = 54;
+										break;
+									case 2:
+										tiles[x][y] = 67;
+										break;
+									case 3:
+										tiles[x][y] = 68;
+										break;
+									default:
+										tiles[x][y] = 68;
+								}
+							}
+							
+						}*/
+						
+						if((tiles[x][y - 1] == 66) || (tiles[x][y - 1] == 55))
+						{
+							int nextTile = ThreadLocalRandom.current().nextInt(1, 3);
+
+							switch(nextTile){
+								case 1:
+									tiles[x][y] = 56;
+									break;
+								case 2:
+									tiles[x][y] = 45;
+									break;
+								default:
+									tiles[x][y] = 45;
+							}
+						}
 					}
+					else
+					{
+						if((tiles[endTileX][y] == 60) || (tiles[endTileX][y] == 61) || (tiles[endTileX][y] == 62))
+						{
+							int nextTile = ThreadLocalRandom.current().nextInt(1, 5);
+
+							switch(nextTile){
+								case 1:
+									tiles[x][y] = 61;
+									break;
+								case 2:
+									tiles[x][y] = 62;
+									break;
+								case 3:
+									tiles[x][y] = 63;
+									break;
+								case 4:
+									tiles[x][y] = 54;
+									break;
+								default:
+									tiles[x][y] = 61;
+							}
+						}
+						else
+						if((tiles[endTileX][y] == 55) || (tiles[endTileX][y] == 66) || (tiles[endTileX][y] == 67) || (tiles[endTileX][y] == 68))
+						{
+							int nextTile = ThreadLocalRandom.current().nextInt(1, 5);
+
+							switch(nextTile){
+								case 1:
+									tiles[x][y] = 67;
+									break;
+								case 2:
+									tiles[x][y] = 68;
+									break;
+								case 3:
+									tiles[x][y] = 69;
+									break;
+								case 4:
+									tiles[x][y] = 63;
+									break;
+								default:
+									tiles[x][y] = 63;
+							}
+						}
+						else
+						if((tiles[endTileX][y] == 54) || (tiles[endTileX][y] == 63) || (tiles[endTileX][y] == 64) || (tiles[endTileX][y] == 65))
+						{
+							int nextTile = ThreadLocalRandom.current().nextInt(1, 5);
+
+							switch(nextTile){
+								case 1:
+									tiles[x][y] = 64;
+									break;
+								case 2:
+									tiles[x][y] = 65;
+									break;
+								case 3:
+									tiles[x][y] = 66;
+									break;
+								case 4:
+									tiles[x][y] = 55;
+									break;
+								default:
+									tiles[x][y] = 64;
+							}
+						}
+						else
+						if((tiles[endTileX][y] == 69) || (tiles[endTileX][y] == 0))
+						{
+							int nextTile = ThreadLocalRandom.current().nextInt(1, 3);
+
+							switch(nextTile){
+								case 1:
+									tiles[x][y] = 0;
+									break;
+								case 2:
+									tiles[x][y] = 60;
+									break;
+								default:
+									tiles[x][y] = 0;
+							}
+						}
+					}
+
+					tilePos[x][y].x = tilePos[endTileX][y].x + 32;
 				}
-					
-				tilePos.get(i).x = tilePos.get(endTile).x + 32;
-      	  	}
+			}
 		}
 
         gameCam.update();
@@ -251,8 +405,9 @@ public class PlayScreen implements Screen {
 
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
-		for(int i = 0; i < tilesOnScreen; i++)
-        	game.batch.draw(tileSet.get(tiles[i]), tilePos.get(i).x, tilePos.get(i).y);
+		for(int y = 0; y < screenTileHeight  ; y++)
+			for(int x = 0; x < screenTileWidth; x++)
+        	game.batch.draw(tileSet.get(tiles[x][y]), tilePos[x][y].x, tilePos[x][y].y);
         player.draw(game.batch);
         game.batch.end();
 
