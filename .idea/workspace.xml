@@ -9,7 +9,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/build/classes/main/chronikspartan/eosadventure/Screens/PlayScreen.class" afterPath="$PROJECT_DIR$/core/build/classes/main/chronikspartan/eosadventure/Screens/PlayScreen.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/build/libs/core-1.0.jar" afterPath="$PROJECT_DIR$/core/build/libs/core-1.0.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/android/android.iml" afterPath="$PROJECT_DIR$/android/android.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/chronikspartan/eosadventure/Screens/PlayScreen.java" afterPath="$PROJECT_DIR$/core/src/chronikspartan/eosadventure/Screens/PlayScreen.java" />
     </list>
     <ignored path="EosAdventure.iws" />
@@ -73,9 +72,12 @@
       <file leaf-file-name="PlayScreen.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/core/src/chronikspartan/eosadventure/Screens/PlayScreen.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="655">
-              <caret line="167" column="25" selection-start-line="167" selection-start-column="25" selection-end-line="167" selection-end-column="25" />
-              <folding />
+            <state relative-caret-position="-364">
+              <caret line="370" column="90" selection-start-line="370" selection-start-column="90" selection-end-line="370" selection-end-column="90" />
+              <folding>
+                <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+                <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -3917,7 +3919,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -3991,14 +3993,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/core/src/chronikspartan/eosadventure/Screens/PlayScreen.java</url>
-          <line>167</line>
-          <properties />
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-      </breakpoints>
       <option name="time" value="10" />
     </breakpoint-manager>
     <watches-manager />
@@ -4029,7 +4023,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+            <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -4058,7 +4055,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+            <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -4087,7 +4087,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+            <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -4116,7 +4119,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+            <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -4145,7 +4151,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+            <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -4174,7 +4183,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+            <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -4282,9 +4294,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/core/src/chronikspartan/eosadventure/Screens/PlayScreen.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="655">
-          <caret line="167" column="25" selection-start-line="167" selection-start-column="25" selection-end-line="167" selection-end-column="25" />
-          <folding />
+        <state relative-caret-position="-364">
+          <caret line="370" column="90" selection-start-line="370" selection-start-column="90" selection-end-line="370" selection-end-column="90" />
+          <folding>
+            <marker date="1497365347622" expanded="false" signature="11865:11876" ph=" { " />
+            <marker date="1497365347622" expanded="false" signature="11907:11913" ph=" }" />
+          </folding>
         </state>
       </provider>
     </entry>
