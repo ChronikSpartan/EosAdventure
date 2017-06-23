@@ -13,10 +13,15 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 import chronikspartan.eosadventure.EosAdventure;
@@ -44,15 +49,17 @@ public class PlayScreen implements Screen {
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
 
+	private Body b2Body;
     private World world;
     private Box2DDebugRenderer b2dr;
 
     private Eo player;
 
-    private Array<TextureRegion> tileSet;
+    private Array<TextureRegion> tileSet, reverseTileSet;
+	private BodyDef[][] tileBodies;
 	//private Array<Vector2> tilePos;
 	private int[][] tiles;
-	private Vector2[][] tilePos;
+	private Vector2[][] tilePos, reverseTilePos;
     private int tileWidth = 32;
     private int tileHeight = 32;
     private int packHeight = 10;
@@ -61,16 +68,29 @@ public class PlayScreen implements Screen {
 	private int screenTileHeight = 15;
     private TextureRegion region1, region2, region3, region4;
 	private Vector2 region1Pos, region2Pos, region3Pos, region4Pos;
+	private Texture worldBackdrop;
 
     public PlayScreen(EosAdventure game){
         atlas = new TextureAtlas("sprites/Eo_Baddies_Orbs.pack");
         TextureRegion region = new TextureRegion(new Texture("maps/TilePack.png"));
+		TextureRegion inverseRegion = new TextureRegion(new Texture("maps/InverseTilePack.png"));
+		worldBackdrop = new Texture("sprites/World_Backdrop.png");
 
         tileSet = new Array<TextureRegion>();
+		reverseTileSet = new Array<TextureRegion>();
+		
         for (int h = 0; h < packHeight; h++)
             for(int w = 0; w < packWidth; w++)
+			{
                 tileSet.add(new TextureRegion(region, w * tileWidth, h * tileHeight, tileWidth, tileHeight));
+			}
 		
+		for (int h = packHeight - 1; h >= 0; h--)
+            for(int w = 0; w < packWidth; w++)
+			{
+				reverseTileSet.add(new TextureRegion(inverseRegion, w * tileWidth, h * tileHeight, tileWidth, tileHeight));
+			}
+				
 		tiles = new int[screenTileWidth][screenTileHeight];
 		tilePos = new Vector2[screenTileWidth][screenTileHeight];
 		
@@ -78,6 +98,10 @@ public class PlayScreen implements Screen {
 		{
 			for (int x = 0; x < screenTileWidth; x++)
 			{
+				tileBodies[x][y] = new BodyDef();
+				tileBodies[x][y].type = BodyDef.BodyType.StaticBody;
+				b2Body = world.createBody(tileBodies[x][y]);
+				
 				if(y == 0)
 				{
 					if(x == 0)
@@ -96,8 +120,22 @@ public class PlayScreen implements Screen {
 				}
 				else
 					tiles[x][y] = 0;
+					
+				if(tiles[x][y] == 61 || tiles[x][y] == 62)
+				{
+					FixtureDef fDef = new FixtureDef();
+					PolygonShape shape = new PolygonShape();
+					shape.setAsBox(tileWidth, tileHeight);
+
+					fDef.shape = shape;
+					b2Body.createFixture(fDef);
+					
+					shape.dispose();
+				}
+					
 				
-				tilePos[x][y] = new Vector2(x * 32, (EosAdventure.GAME_HEIGHT/2) + (y * 32) - 32);
+				tilePos[x][y] = new Vector2(x * 32, y * 32);
+				tileBodies[x][y].position.set(tilePos[x][y]);
 			}
 		}
 
@@ -110,8 +148,7 @@ public class PlayScreen implements Screen {
         map = mapLoader.load("maps/EosAdventure.tmx");
         renderer = new OrthogonalTiledMapRenderer(map);
         // Set cam position offset for width and at center of map for height
-        gameCam.position.set(EosAdventure.VIEW_WIDTH/2,
-                (EosAdventure.GAME_HEIGHT/2) + (EosAdventure.VIEW_HEIGHT/3), 0);
+        gameCam.position.set(EosAdventure.VIEW_WIDTH/2, EosAdventure.VIEW_HEIGHT/2, 0);
 
 		// World and gravity
         world = new World(new Vector2(0, -10), true);
@@ -150,7 +187,12 @@ public class PlayScreen implements Screen {
         player.update(dt);
 
         gameCam.position.x = player.b2Body.getPosition().x;
-        gameCam.position.y = player.b2Body.getPosition().y;
+		
+		// Stop camera going below ground level
+		if(player.b2Body.getPosition().y < EosAdventure.VIEW_HEIGHT/2)
+			gameCam.position.y = EosAdventure.VIEW_HEIGHT/2;
+		else
+        	gameCam.position.y = player.b2Body.getPosition().y;
 
 		for (int x = 0; x < screenTileWidth; x++)
 		{
@@ -468,6 +510,7 @@ public class PlayScreen implements Screen {
 				}
 			}
 		}
+		
 
         gameCam.update();
         renderer.setView(gameCam);
@@ -480,15 +523,19 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        renderer.render();
+        //renderer.render();
 
        // b2dr.render(world, gameCam.combined);
 
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
+		game.batch.draw(worldBackdrop, 0, (EosAdventure.GAME_HEIGHT/2) - (worldBackdrop.getHeight()/2));
 		for(int y = 0; y < screenTileHeight  ; y++)
 			for(int x = 0; x < screenTileWidth; x++)
-        	game.batch.draw(tileSet.get(tiles[x][y]), tilePos[x][y].x, tilePos[x][y].y);
+			{
+        		game.batch.draw(tileSet.get(tiles[x][y]), tilePos[x][y].x, tilePos[x][y].y);
+				game.batch.draw(reverseTileSet.get(tiles[x][y]) , tilePos[x][y].x, -tilePos[x][y].y - TILE_SIZE);
+			}
         player.draw(game.batch);
         game.batch.end();
 
