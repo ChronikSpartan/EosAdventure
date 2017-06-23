@@ -105,7 +105,7 @@ public class Eo extends Sprite {
 
     public void defineEo(){
         BodyDef bDef = new BodyDef();
-        bDef.position.set(32, /*(EosAdventure.GAME_HEIGHT/2) + (EosAdventure.VIEW_HEIGHT/3)*/ + 32);
+        bDef.position.set(32, 32);
         bDef.type = BodyDef.BodyType.DynamicBody;
         b2Body = world.createBody(bDef);
 
