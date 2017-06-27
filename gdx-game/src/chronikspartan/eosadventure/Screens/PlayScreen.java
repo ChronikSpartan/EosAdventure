@@ -49,14 +49,14 @@ public class PlayScreen implements Screen {
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
 
-	private Body b2Body;
+	private BodyDef bDef;
     private World world;
     private Box2DDebugRenderer b2dr;
 
     private Eo player;
 
     private Array<TextureRegion> tileSet, reverseTileSet;
-	private BodyDef[][] tileBodies;
+	private Body[][] tileBodies;
 	//private Array<Vector2> tilePos;
 	private int[][] tiles;
 	private Vector2[][] tilePos, reverseTilePos;
@@ -90,18 +90,20 @@ public class PlayScreen implements Screen {
 			{
 				reverseTileSet.add(new TextureRegion(inverseRegion, w * tileWidth, h * tileHeight, tileWidth, tileHeight));
 			}
-				
+
+		// World and gravity
+		world = new World(new Vector2(0, -10), true);
+		b2dr = new Box2DDebugRenderer();
+		bDef = new BodyDef();
+
 		tiles = new int[screenTileWidth][screenTileHeight];
 		tilePos = new Vector2[screenTileWidth][screenTileHeight];
+		tileBodies = new Body[screenTileWidth][screenTileHeight];
 		
 		for (int y = 0; y < screenTileHeight; y++)
 		{
 			for (int x = 0; x < screenTileWidth; x++)
 			{
-				tileBodies[x][y] = new BodyDef();
-				tileBodies[x][y].type = BodyDef.BodyType.StaticBody;
-				b2Body = world.createBody(tileBodies[x][y]);
-				
 				if(y == 0)
 				{
 					if(x == 0)
@@ -120,7 +122,13 @@ public class PlayScreen implements Screen {
 				}
 				else
 					tiles[x][y] = 0;
-					
+
+				tilePos[x][y] = new Vector2(x * 32, y * 32);
+
+				bDef.type = BodyDef.BodyType.KinematicBody;
+				bDef.position.set(tilePos[x][y]);
+				tileBodies[x][y] = world.createBody(bDef);
+
 				if(tiles[x][y] == 61 || tiles[x][y] == 62)
 				{
 					FixtureDef fDef = new FixtureDef();
@@ -128,14 +136,10 @@ public class PlayScreen implements Screen {
 					shape.setAsBox(tileWidth, tileHeight);
 
 					fDef.shape = shape;
-					b2Body.createFixture(fDef);
-					
+					tileBodies[x][y].createFixture(fDef);
+
 					shape.dispose();
 				}
-					
-				
-				tilePos[x][y] = new Vector2(x * 32, y * 32);
-				tileBodies[x][y].position.set(tilePos[x][y]);
 			}
 		}
 
@@ -150,10 +154,6 @@ public class PlayScreen implements Screen {
         // Set cam position offset for width and at center of map for height
         gameCam.position.set(EosAdventure.VIEW_WIDTH/2, EosAdventure.VIEW_HEIGHT/2, 0);
 
-		// World and gravity
-        world = new World(new Vector2(0, -10), true);
-        b2dr = new Box2DDebugRenderer(); 
-		
 		new B2WorldCreator(world, map);
 
         // create Eo in aour game world
@@ -189,9 +189,9 @@ public class PlayScreen implements Screen {
         gameCam.position.x = player.b2Body.getPosition().x;
 		
 		// Stop camera going below ground level
-		if(player.b2Body.getPosition().y < EosAdventure.VIEW_HEIGHT/2)
+	/*	if(player.b2Body.getPosition().y < EosAdventure.VIEW_HEIGHT/2)
 			gameCam.position.y = EosAdventure.VIEW_HEIGHT/2;
-		else
+		else*/
         	gameCam.position.y = player.b2Body.getPosition().y;
 
 		for (int x = 0; x < screenTileWidth; x++)
@@ -414,12 +414,6 @@ public class PlayScreen implements Screen {
 									case 3:
 										tiles[x][y] = 63;
 										break;
-									/*case 4:
-										tiles[x][y] = 45;
-										break;
-									case 5:
-										tiles[x][y] = 56;
-										break;*/
 									case 4:
 										tiles[x][y] = 54;
 										break;
@@ -439,12 +433,6 @@ public class PlayScreen implements Screen {
 									case 3:
 										tiles[x][y] = 63;
 										break;
-									/*case 4:
-										tiles[x][y] = 45;
-										break;
-									case 5:
-										tiles[x][y] = 56;
-										break;*/
 									default:
 										tiles[x][y] = 63;
 								}
@@ -506,7 +494,25 @@ public class PlayScreen implements Screen {
 						}
 					}
 
+					world.destroyBody(tileBodies[x][y]);
 					tilePos[x][y].x = tilePos[endTileX][y].x + 32;
+					bDef.position.set(tilePos[x][y]);
+					tileBodies[x][y] = world.createBody(bDef);
+					
+					if(tiles[x][y] == 60 || tiles[x][y] == 61 || tiles[x][y] == 62
+					   || tiles[x][y] == 63 || tiles[x][y] == 64 || tiles[x][y] == 65
+					   || tiles[x][y] == 66 || tiles[x][y] == 67 || tiles[x][y] == 68
+					   || tiles[x][y] == 69 || tiles[x][y] == 54 || tiles[x][y] == 55)
+					{
+						FixtureDef fDef = new FixtureDef();
+						PolygonShape shape = new PolygonShape();
+						shape.setAsBox(tileWidth, tileHeight);
+
+						fDef.shape = shape;
+						tileBodies[x][y].createFixture(fDef);
+
+						shape.dispose();
+					}
 				}
 			}
 		}
@@ -525,7 +531,7 @@ public class PlayScreen implements Screen {
 
         //renderer.render();
 
-       // b2dr.render(world, gameCam.combined);
+        b2dr.render(world, gameCam.combined);
 
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
@@ -534,7 +540,7 @@ public class PlayScreen implements Screen {
 			for(int x = 0; x < screenTileWidth; x++)
 			{
         		game.batch.draw(tileSet.get(tiles[x][y]), tilePos[x][y].x, tilePos[x][y].y);
-				game.batch.draw(reverseTileSet.get(tiles[x][y]) , tilePos[x][y].x, -tilePos[x][y].y - TILE_SIZE);
+				//game.batch.draw(reverseTileSet.get(tiles[x][y]) , tilePos[x][y].x, -tilePos[x][y].y - TILE_SIZE);
 			}
         player.draw(game.batch);
         game.batch.end();
